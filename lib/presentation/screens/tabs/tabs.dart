@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gozalapp/presentation/screens/tabs/home/home_screen.dart';
-import 'package:gozalapp/presentation/screens/tabs/lukas/lukas_screen.dart';
-import 'package:gozalapp/presentation/screens/tabs/maps/maps_screen.dart';
-import 'package:gozalapp/presentation/screens/tabs/shopping/shopping_screen.dart';
-import 'package:gozalapp/presentation/screens/tabs/vacilon/vacilon_screen.dart';
+import 'package:gozalapp/presentation/views/views.dart';
+import 'package:gozalapp/presentation/widgets/header/header_widget.dart';
 
 class TabsScreen extends StatefulWidget {
   static const name = 'tabs-screen';
@@ -16,20 +13,21 @@ class TabsScreen extends StatefulWidget {
 class _TabsScreenState extends State<TabsScreen> {
   int currentTab = 0;
   final List<Widget> screens = const [
-    HomeScreen(),
-    VacilonScreen(),
-    ShoppingScreen(),
-    MapsScreen(),
-    LukasScreen(),
+    HomeView(),
+    LukasView(),
+    MapsView(),
+    ShoppingView(),
+    VacilonView()
   ];
 
   final PageStorageBucket bucket = PageStorageBucket();
 
-  Widget currentScreen = const HomeScreen();
+  Widget currentScreen = const HomeView();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: HeaderWidget(),
       body: PageStorage(
         bucket: bucket,
         child: currentScreen,
@@ -38,7 +36,7 @@ class _TabsScreenState extends State<TabsScreen> {
         onPressed: () {
           setState(() {
             currentTab = 4;
-            currentScreen = const LukasScreen();
+            currentScreen = const LukasView();
           });
         },
         shape: const CircleBorder(),
@@ -61,7 +59,7 @@ class _TabsScreenState extends State<TabsScreen> {
               onTap: () {
                 setState(() {
                   currentTab = 0;
-                  currentScreen = const HomeScreen();
+                  currentScreen = const HomeView();
                 });
               },
             ),
@@ -72,7 +70,7 @@ class _TabsScreenState extends State<TabsScreen> {
               onTap: () {
                 setState(() {
                   currentTab = 1;
-                  currentScreen = const VacilonScreen();
+                  currentScreen = const VacilonView();
                 });
               },
             ),
@@ -84,7 +82,7 @@ class _TabsScreenState extends State<TabsScreen> {
               onTap: () {
                 setState(() {
                   currentTab = 2;
-                  currentScreen = const ShoppingScreen();
+                  currentScreen = const ShoppingView();
                 });
               },
             ),
@@ -95,7 +93,7 @@ class _TabsScreenState extends State<TabsScreen> {
               onTap: () {
                 setState(() {
                   currentTab = 3;
-                  currentScreen = const MapsScreen();
+                  currentScreen = const MapsView();
                 });
               },
             ),
@@ -135,3 +133,4 @@ class _TabsScreenState extends State<TabsScreen> {
     );
   }
 }
+
