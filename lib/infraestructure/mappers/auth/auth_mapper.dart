@@ -21,4 +21,25 @@ class AuthMapper {
 
   static Logout logoutToEntity(LogoutResponse logout) => Logout(
     ok: logout.ok, message: logout.message);
+
+  static Register registerToEntity(CreateUserResponse register) => Register(
+    ok: register.ok,
+    token: register.token,
+    participant: ParticipantRegister(
+      id: register.participantData.id, 
+      email: register.participantData.email, 
+      name: register.participantData.name, 
+      avatar: register.participantData.avatar,
+      uid: register.participantData.uid, 
+      uidType: register.participantData.uidType, 
+      state: register.participantData.state
+      ),
+    message: register.message
+  );
+
+  static SendVerifyPhone sendVerifyPhoneToEntity(SendVerifyPhoneResponse sendVerifyPhone) => 
+  SendVerifyPhone(ok: sendVerifyPhone.ok, message: sendVerifyPhone.message);
+
+  static VerifyPhone verifyPhoneToEntity(VerifyPhoneResponse verifyPhone) => 
+  VerifyPhone(ok: verifyPhone.ok, message: verifyPhone.message);
 }
