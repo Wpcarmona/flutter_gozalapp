@@ -99,6 +99,7 @@ class _FormContent extends StatelessWidget {
             label: 'Numero de documento',
             onChanged: loginCubit.numberDocumentChanged,
             errorMessage: userDocument.errorMessage,
+            keyboardType: TextInputType.phone,
           ),
         ),
         Padding(
@@ -108,6 +109,7 @@ class _FormContent extends StatelessWidget {
             obscureText: true,
             onChanged: loginCubit.passwordChanged,
             errorMessage: passwoord.errorMessage,
+            keyboardType: TextInputType.text,
           ),
         ),
         Align(
@@ -134,7 +136,9 @@ class _FormContent extends StatelessWidget {
                     BorderRadius.circular(10), // Bordes redondeados
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              loginCubit.onSubmit();
+            },
             child: const Text(
               'Ingresar',
               style: TextStyle(
@@ -173,40 +177,51 @@ class _FormContent extends StatelessWidget {
             ),
           ),
         ),
-        SafeArea(
-          child: Positioned(
-            bottom: 30,
-            left: 20, // Margen izquierdo
-            right: 20,
-            child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      '¿No tienes cuenta?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: Color(0xFFB49480)
-                      ),
-                      ),
-                    TextButton(
-                      onPressed: () {
-                        context.push('/auth/register');
-                      },
-                      child: const Text(
-                        'Registrate',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: Color(0xFFFFAA02),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-          ),
-        )
+        _RegisterButton()
       ],
     );
+  }
+}
+
+class _RegisterButton extends StatelessWidget {
+  const _RegisterButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Positioned(
+        bottom: 30,
+        left: 20, // Margen izquierdo
+        right: 20,
+        child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  '¿No tienes cuenta?',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: Color(0xFFB49480)
+                  ),
+                  ),
+                TextButton(
+                  onPressed: () {
+                    context.push('/auth/register');
+                  },
+                  child: const Text(
+                    'Registrate',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Color(0xFFFFAA02),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+      ),
+      
+    );
+    
   }
 }
