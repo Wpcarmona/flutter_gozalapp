@@ -8,3 +8,4 @@ export 'participant/user.dart';
 export 'referrals/referrals.dart';
 export 'tutorial/tutorial.dart';
 export 'wall/comments.dart';
+export 'push_message/push_message.dart';

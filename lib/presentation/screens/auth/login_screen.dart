@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gozalapp/infraestructure/inputs/numberDocument.dart';
-import 'package:gozalapp/infraestructure/inputs/password.dart';
-import 'package:gozalapp/presentation/cubit/login/login_cubit.dart';
+import 'package:gozalapp/presentation/providers/providers.dart';
 import 'package:gozalapp/presentation/widgets/widgets.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -12,17 +10,14 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (context) => LoginCubit(), child: _LoginPage());
+    return _LoginPage();
   }
 }
 
-class _LoginPage extends StatelessWidget {
+class _LoginPage extends ConsumerWidget {
   const _LoginPage();
   @override
-  Widget build(BuildContext context) {
-    final loginCubit = context.watch<LoginCubit>();
-    final userDocument = loginCubit.state.numberDocument;
-    final passwoord = loginCubit.state.password;
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Stack(
         children: [
@@ -43,7 +38,8 @@ class _LoginPage extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/Images/background_barranquilla.png'),
+                  image:
+                      AssetImage('assets/Images/background_barranquilla.png'),
                   fit: BoxFit.cover,
                 ),
                 color: Color(0xFFFBE9DC),
@@ -52,10 +48,7 @@ class _LoginPage extends StatelessWidget {
                   topRight: Radius.circular(30),
                 ),
               ),
-              child: _FormContent(
-                loginCubit: loginCubit, 
-                userDocument: userDocument, 
-                passwoord: passwoord),
+              child: _FormContent(),
             ),
           ),
         ],
@@ -64,19 +57,24 @@ class _LoginPage extends StatelessWidget {
   }
 }
 
-class _FormContent extends StatelessWidget {
-  const _FormContent({
-    required this.loginCubit,
-    required this.userDocument,
-    required this.passwoord,
-  });
+class _FormContent extends ConsumerWidget {
+  const _FormContent();
 
-  final LoginCubit loginCubit;
-  final NumberDocument userDocument;
-  final Password passwoord;
+  void showSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loginForm = ref.watch(loginFormProvider);
+    ref.listen(authProvider, (previous, next) {
+      if (next.errorMessage.isNotEmpty) {
+        showSnackbar(context, next.errorMessage);
+      }
+    });
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,8 +95,11 @@ class _FormContent extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: CustomTextFormField(
             label: 'Numero de documento',
-            onChanged: loginCubit.numberDocumentChanged,
-            errorMessage: userDocument.errorMessage,
+            onChanged:
+                ref.read(loginFormProvider.notifier).onNumerDocumentChanged,
+            errorMessage: loginForm.numberDocument.isPure
+                ? null
+                : loginForm.numberDocument.errorMessage,
             keyboardType: TextInputType.phone,
           ),
         ),
@@ -107,15 +108,19 @@ class _FormContent extends StatelessWidget {
           child: CustomTextFormField(
             label: 'Contraseña',
             obscureText: true,
-            onChanged: loginCubit.passwordChanged,
-            errorMessage: passwoord.errorMessage,
+            onChanged: ref.read(loginFormProvider.notifier).onPasswordChanged,
+            errorMessage: loginForm.password.isPure
+                ? null
+                : loginForm.password.errorMessage,
             keyboardType: TextInputType.text,
           ),
         ),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                context.go('/auth/reset-password');
+              },
               child: const Text(
                 'Olvidé mi contraseña',
                 style: TextStyle(
@@ -129,21 +134,21 @@ class _FormContent extends StatelessWidget {
           child: FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Color(0xFFFFAA02), // Color del botón
-              padding: const EdgeInsets.symmetric(
-                  vertical: 15), // Padding vertical
+              padding:
+                  const EdgeInsets.symmetric(vertical: 15), // Padding vertical
               shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(10), // Bordes redondeados
+                borderRadius: BorderRadius.circular(10), // Bordes redondeados
               ),
             ),
-            onPressed: () {
-              loginCubit.onSubmit();
-            },
-            child: const Text(
-              'Ingresar',
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            onPressed: loginForm.isValid
+                ? () => ref.read(loginFormProvider.notifier).onFormSubmit()
+                : null,
+            child: loginForm.formStatus == FormStatus.validating
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text(
+                    'Ingresar',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
           ),
         ),
         Padding(
@@ -194,34 +199,31 @@ class _RegisterButton extends StatelessWidget {
         left: 20, // Margen izquierdo
         right: 20,
         child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  '¿No tienes cuenta?',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: Color(0xFFB49480)
-                  ),
-                  ),
-                TextButton(
-                  onPressed: () {
-                    context.push('/auth/register');
-                  },
-                  child: const Text(
-                    'Registrate',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: Color(0xFFFFAA02),
-                    ),
-                  ),
-                ),
-              ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '¿No tienes cuenta?',
+              style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: Color(0xFFB49480)),
             ),
+            TextButton(
+              onPressed: () {
+                context.go('/auth/register');
+              },
+              child: const Text(
+                'Registrate',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: Color(0xFFFFAA02),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      
     );
-    
   }
 }

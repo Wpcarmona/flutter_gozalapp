@@ -1,4 +1,4 @@
-package com.example.gozalapp
+package com.superliker.gozalapp
 
 import io.flutter.embedding.android.FlutterActivity
 

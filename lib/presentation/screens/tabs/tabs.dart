@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gozalapp/presentation/views/views.dart';
-import 'package:gozalapp/presentation/widgets/header/header_widget.dart';
+import 'package:gozalapp/presentation/widgets/widgets.dart';
 
 class TabsScreen extends StatefulWidget {
   static const name = 'tabs-screen';
@@ -26,8 +26,12 @@ class _TabsScreenState extends State<TabsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
     return Scaffold(
-      appBar: HeaderWidget(),
+      appBar: HeaderWidget(scaffoldKey: scaffoldKey),
+      key: scaffoldKey,
+      drawer: SideMenu(scaffoldKey: scaffoldKey),
       body: PageStorage(
         bucket: bucket,
         child: currentScreen,
@@ -74,7 +78,6 @@ class _TabsScreenState extends State<TabsScreen> {
                 });
               },
             ),
-            const SizedBox(width: 40), // Espacio para el FAB
             _buildBottomBarItem(
               icon: Icons.shopping_bag_outlined,
               label: 'Compras',

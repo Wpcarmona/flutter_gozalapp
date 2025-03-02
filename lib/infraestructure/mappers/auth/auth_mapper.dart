@@ -25,7 +25,7 @@ class AuthMapper {
   static Register registerToEntity(CreateUserResponse register) => Register(
     ok: register.ok,
     token: register.token,
-    participant: ParticipantRegister(
+    participant: Participant(
       id: register.participantData.id, 
       email: register.participantData.email, 
       name: register.participantData.name, 

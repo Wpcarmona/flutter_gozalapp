@@ -41,7 +41,7 @@ class AuthSPDatasource extends AuthDatasource {
     final response = await dio.post(
       '/auth/login',
       data: {
-        'numberDocument': numberDocument,
+        'numero_de_documento': numberDocument,
         'password': password,
       },
     );
@@ -64,19 +64,30 @@ class AuthSPDatasource extends AuthDatasource {
   }
   
   @override
-  Future<Register> register({required String email, required String typeDocument, required String numberDocument, required String password, required String passwordConfirmation, required String numberPhone, required String completeName, required String countryCode, required String dateOfBirth}) async {
+  Future<Register> register({
+    required String email, 
+    required String numberDocument, 
+    required String typeDocument, 
+    required String password, 
+    required String passwordConfirmation, 
+    required String numberPhone, 
+    required String completeName, 
+    required String countryCode, 
+    required String dateOfBirth}) async {
     
     final response = await dio.post(
       '/users/create',
       data:{
-        'email': email,
-        'numero_de_documento': numberDocument,
-        'tipo_de_documento': typeDocument,
-        'password': password,
-        'password_confirm': passwordConfirmation,
-        'numero_de_celular': countryCode + numberPhone,
-        'nombre_completo': completeName,
-        'fecha_de_nacimiento': dateOfBirth,
+        'properties' : {
+          'email': email,
+          'tipo_de_documento': numberDocument,
+          'numero_de_documento': typeDocument,
+          'password': password,
+          'password_confirm': passwordConfirmation,
+          'numero_de_celular': countryCode + numberPhone,
+          'nombre_completo': completeName,
+          'fecha_de_nacimiento': dateOfBirth,
+        }
       }
     );
     return _jsonToRegister(response.data);

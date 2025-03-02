@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ResetPasswordScreen extends StatelessWidget {
+  static const name = 'reset-password-screen';
   const ResetPasswordScreen({super.key});
 
   @override

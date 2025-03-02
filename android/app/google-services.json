@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "951183260820",
+    "project_id": "gozalapp",
+    "storage_bucket": "gozalapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:951183260820:android:999a3097a433638ebbc881",
+        "android_client_info": {
+          "package_name": "com.superliker.gozalapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABBQjS8fM-mqeO37c8k5suxcjgA_mNEHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:951183260820:android:ca36a55b5871aed9bbc881",
+        "android_client_info": {
+          "package_name": "com.superlikers.gozalapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABBQjS8fM-mqeO37c8k5suxcjgA_mNEHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

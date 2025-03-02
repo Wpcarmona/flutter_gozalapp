@@ -11,14 +11,14 @@ abstract class AuthRepository {
 
   Future<Register> register({
     required String email,
-    required String typeDocument,
     required String numberDocument,
+    required String typeDocument,
     required String password,
     required String passwordConfirmation,
     required String numberPhone,
     required String completeName,
     required String countryCode,
-    required String dateOfBirth
+    required String dateOfBirth,
   });
 
   Future<SendVerifyPhone> sendVerifyPhone({

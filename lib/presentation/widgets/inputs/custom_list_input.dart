@@ -3,9 +3,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 
 class CustomInputList extends StatelessWidget {
   final String? label;
-  final int? selectedValue;
-  final Function(int?)? onChanged;
-  final List<int> items;
+  final String? selectedValue;
+  final void Function(String?)? onChanged;
+  final List<String> items;
+  final String? errorMessage;
 
   const CustomInputList({
     super.key,
@@ -13,6 +14,7 @@ class CustomInputList extends StatelessWidget {
     this.label,
     this.selectedValue,
     this.onChanged,
+    this.errorMessage,
   });
 
   @override
@@ -20,38 +22,45 @@ class CustomInputList extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final border = OutlineInputBorder(borderRadius: BorderRadius.circular(10));
 
-    return DropdownButtonFormField2<int>(
+    return DropdownButtonFormField2<String>(
       value: selectedValue,
-      isExpanded: true, // Evita que el botón se recorte
+      isExpanded: true,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
         enabledBorder: border.copyWith(
-          borderSide: BorderSide(color: Color(0xFFFBE9DC), width: 1),
+          borderSide: const BorderSide(color: Color(0xFFFBE9DC), width: 1),
         ),
         focusedBorder: border.copyWith(
-          borderSide: BorderSide(color: Color(0xFFFFC942), width: 1),
+          borderSide: const BorderSide(color: Color(0xFFFFC942), width: 1),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        errorBorder: border.copyWith(
+          borderSide: BorderSide(color: colors.error, width: 1),
+        ),
+        focusedErrorBorder: border.copyWith(
+          borderSide: BorderSide(color: colors.error, width: 1),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         labelText: label,
+        errorText: errorMessage, // Se muestra si hay un error
       ),
       dropdownStyleData: DropdownStyleData(
-        maxHeight: 200, // Limita la altura del dropdown
+        maxHeight: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: Colors.white,
         ),
       ),
-      menuItemStyleData: MenuItemStyleData(
+      menuItemStyleData: const MenuItemStyleData(
         padding: EdgeInsets.symmetric(horizontal: 15),
       ),
       items: items
-          .map((value) => DropdownMenuItem<int>(
+          .map((value) => DropdownMenuItem<String>(
                 value: value,
-                child: Text(value.toString()),
+                child: Text(value),
               ))
           .toList(),
-      onChanged: onChanged,
+      onChanged: onChanged, // Se pasa la función correctamente
     );
   }
 }
