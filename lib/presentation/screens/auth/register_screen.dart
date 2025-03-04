@@ -762,7 +762,7 @@ class _FourForm extends ConsumerWidget {
             items: [
               {"text": "tendero", "imagePath": "assets/Images/tendero.png"},
               {"text": "mesero", "imagePath": "assets/Images/mesero.png"},
-              {"text": "nada", "imagePath": "assets/Images/ninguno.png"},
+              {"text": "ninguno", "imagePath": "assets/Images/ninguno.png"},
             ],
             onItemSelected: (selected) {
               ref.read(tagFormProvider.notifier).onTagChanged(selected);
