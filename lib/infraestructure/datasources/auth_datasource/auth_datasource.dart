@@ -34,6 +34,11 @@ class AuthSPDatasource extends AuthDatasource {
     final verifyPhoneResponse = VerifyPhoneResponse.fromJson(json);
     return AuthMapper.verifyPhoneToEntity(verifyPhoneResponse);
   }
+
+  UpdateUser _jsonToUpdateUser(Map<String, dynamic> json) {
+    final updateUserResponse = UpdateUserResponse.fromJson(json);
+    return AuthMapper.updateUserTagToEntity(updateUserResponse);
+  }
   
   @override
   Future<Login> login(
@@ -50,12 +55,12 @@ class AuthSPDatasource extends AuthDatasource {
   }
 
   @override
-  Future<Logout> logout() async {
+  Future<Logout> logout({required String token}) async {
     final response = await dio.post(
       '/auth/logout',
       options: Options(
         headers: {
-          'Authorization': 'Bearer 123', //TODO agregar el header desde el isar
+          'Authorization': 'Bearer $token',
         }
       )
       );
@@ -114,5 +119,27 @@ class AuthSPDatasource extends AuthDatasource {
       }
     );
     return _jsonToVerifyPhone(response.data);
+  }
+  
+  @override
+  Future<UpdateUser> updateUserTag({
+    required String token, 
+    required String userId,
+    required String tag}) async {
+    final response = await dio.post(
+      '/users/update',
+      data: {
+        'user_id': userId,
+        'properties': {
+            'tags': tag
+        },
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        }
+      )
+    );
+    return _jsonToUpdateUser(response.data);
   }
 }

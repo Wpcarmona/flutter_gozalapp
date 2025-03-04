@@ -5,7 +5,7 @@ abstract class AuthDatasource {
     required String numberDocument,
     required String password
     });
-  Future<Logout> logout();
+  Future<Logout> logout({required String token});
 
   Future<Register> register({
     required String email,
@@ -24,4 +24,11 @@ abstract class AuthDatasource {
   Future<VerifyPhone> verifyPhone({
     required String userId, 
     required String code});
+
+  Future<UpdateUser> updateUserTag({
+    required String token,
+    required String userId,
+    required String tag
+  });
+
 }

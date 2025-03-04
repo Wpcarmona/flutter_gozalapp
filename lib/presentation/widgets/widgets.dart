@@ -10,3 +10,4 @@ export 'Texts/custom_subtitle.dart';
 export 'Texts/custom_title.dart';
 export 'Texts/custom_view_subtitle.dart';
 export 'Texts/custom_view_title.dart';
+export 'checks/selected_card.dart';

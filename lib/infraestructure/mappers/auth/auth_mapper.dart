@@ -42,4 +42,7 @@ class AuthMapper {
 
   static VerifyPhone verifyPhoneToEntity(VerifyPhoneResponse verifyPhone) => 
   VerifyPhone(ok: verifyPhone.ok, message: verifyPhone.message);
+
+  static UpdateUser updateUserTagToEntity(UpdateUserResponse updateUser) => 
+  UpdateUser(ok: updateUser.ok, message: updateUser.message);
 }

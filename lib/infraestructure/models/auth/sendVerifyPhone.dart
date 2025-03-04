@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'dart:convert';
 
 SendVerifyPhoneResponse sendVerifyPhoneResponseFromJson(String str) => SendVerifyPhoneResponse.fromJson(json.decode(str));

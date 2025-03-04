@@ -7,4 +7,5 @@ export 'auth/reset_password_screen.dart';
 export 'screens/detailsNotification_screen.dart';
 export 'screens/notification_screen.dart';
 export 'screens/profile_screen.dart';
+export 'screens/check_auth_status_screen.dart';
 

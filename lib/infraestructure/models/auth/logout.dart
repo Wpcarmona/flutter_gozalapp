@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'dart:convert';
 
 LogoutResponse logoutResponseFromJson(String str) => LogoutResponse.fromJson(json.decode(str));

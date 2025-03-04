@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gozalapp/config/constants/countryCode.dart';
 import 'package:gozalapp/presentation/providers/providers.dart';
 import 'package:gozalapp/presentation/widgets/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterScreen extends StatelessWidget {
   static const name = 'register-screen';
@@ -19,11 +20,14 @@ class RegisterScreen extends StatelessWidget {
   }
 }
 
-class _RegisterView extends StatefulWidget {
+class _RegisterView extends StatefulWidget implements PreferredSizeWidget {
   const _RegisterView();
 
   @override
   State<_RegisterView> createState() => _RegisterViewState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
 class _RegisterViewState extends State<_RegisterView> {
@@ -31,6 +35,21 @@ class _RegisterViewState extends State<_RegisterView> {
   bool enReached = false;
   bool showFirstForm = true;
   int formsStep = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStepRegister();
+  }
+
+  Future<void> _loadStepRegister() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      print('beforeStep: ${prefs.getInt('StepRegister')}');
+      formsStep = prefs.getInt('StepRegister') ?? 1;
+      print('formsStep: $formsStep');
+    });
+  }
 
   void nextStep() {
     setState(() {
@@ -72,7 +91,7 @@ class _RegisterViewState extends State<_RegisterView> {
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
-                  if(formsStep == 3) {
+                  if (formsStep == 3) {
                     setState(() {
                       formsStep--;
                     });
@@ -106,7 +125,8 @@ class _RegisterViewState extends State<_RegisterView> {
               child: switch (formsStep) {
                 1 => _FirstForm(onContinue: nextStep),
                 2 => _SecondForm(onContinue: nextStep),
-                3 => _ThirdForm(),
+                3 => _ThirdForm(onContinue: nextStep),
+                4 => _FourForm(),
                 int() => throw UnimplementedError(),
               },
             ),
@@ -136,6 +156,7 @@ class _FirstFormState extends ConsumerState<_FirstForm> {
   Widget build(BuildContext context) {
     final registerForm = ref.watch(registerFormProvider);
     return FadeInRight(
+      duration: const Duration(milliseconds: 200),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -429,6 +450,7 @@ class _SecondForm extends ConsumerWidget {
       }
     });
     return FadeInRight(
+      duration: const Duration(milliseconds: 200),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -616,13 +638,28 @@ class _SecondForm extends ConsumerWidget {
 }
 
 class _ThirdForm extends ConsumerWidget {
-  const _ThirdForm();
+  final VoidCallback onContinue;
+  const _ThirdForm({required this.onContinue});
+
+  void showSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(authProvider, (previous, next) {
+      if (next.errorMessage.isNotEmpty) {
+        showSnackbar(context, next.errorMessage);
+      } else {
+        onContinue();
+      }
+    });
     final registerForm = ref.watch(registerFormProvider);
     final otpForm = ref.watch(otpFormProvider);
     return FadeInRight(
+      duration: const Duration(milliseconds: 200),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -649,7 +686,7 @@ class _ThirdForm extends ConsumerWidget {
           ),
           const SizedBox(height: 30),
           Text(
-            '${registerForm.phone.value.substring(0,3)}***${registerForm.phone.value.substring(6,10)}',
+            '${registerForm.phone.value.substring(0, 3)}***${registerForm.phone.value.substring(6, 10)}',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Komet',
@@ -660,26 +697,91 @@ class _ThirdForm extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           OtpInputField(
-            length: 6, // Puedes cambiar a 4 si deseas menos inputs
-            onCompleted: ref.read(otpFormProvider.notifier).onOtpChanged,
-            errorMessage: otpForm.otp.isPure
-            ? null
-            : otpForm.otp.errorMessage
-          ),
+              length: 6, // Puedes cambiar a 4 si deseas menos inputs
+              onCompleted: ref.read(otpFormProvider.notifier).onOtpChanged,
+              errorMessage:
+                  otpForm.otp.isPure ? null : otpForm.otp.errorMessage),
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: FilledButton(
               style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFAA02),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-              onPressed: otpForm.isValid 
-              ? ref.read(otpFormProvider.notifier).onFormSubmit
-              : null, 
-              child: const Text('Continuar'),),
+                backgroundColor: const Color(0xFFFFAA02),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: otpForm.isValid
+                  ? ref.read(otpFormProvider.notifier).onFormSubmit
+                  : null,
+              child: const Text('Continuar'),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _FourForm extends ConsumerWidget {
+  const _FourForm();
+
+  
+
+  @override
+  Widget build(BuildContext context,WidgetRef ref) {
+    final tagForm = ref.watch(tagFormProvider);
+    return FadeInRight(
+      duration: const Duration(milliseconds: 200),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 20),
+          const Text(
+            'YA NOS FALTA POQUITO',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'StenbergITC',
+              fontSize: 28,
+              height: 1.2,
+              color: Color(0XFFEC1424),
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            '¿Te identificas con alguno de estos roles?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Komet',
+              fontSize: 14,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 30),
+          SelectableCardList(
+            items: [
+              {"text": "tendero", "imagePath": "assets/Images/tendero.png"},
+              {"text": "mesero", "imagePath": "assets/Images/mesero.png"},
+              {"text": "nada", "imagePath": "assets/Images/ninguno.png"},
+            ],
+            onItemSelected: (selected) {
+              ref.read(tagFormProvider.notifier).onTagChanged(selected);
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFFFAA02),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: tagForm.isValid
+                  ? ref.read(tagFormProvider.notifier).onFormSubmit
+                  : null,
+              child: const Text('Continuar'),
+            ),
           )
         ],
       ),

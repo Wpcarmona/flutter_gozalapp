@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:gozalapp/config/router/app_router.dart';
 
 class LocalNotifications {
@@ -10,19 +11,21 @@ class LocalNotifications {
         ?.requestNotificationsPermission();
   }
 
-  static Future<void> initializeLocalNotifications() async {
-    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    const initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-   // TODO is configuration
-   
-    const initializationSettings =InitializationSettings(android: initializationSettingsAndroid);
-    
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
-      );
-    
-  }
+ static Future<void> initializeLocalNotifications(GoRouter router) async {
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  const initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+
+  const initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (response) => 
+        onDidReceiveNotificationResponse(response, router),
+  );
+}
+
 
   static void showLocalNotification({
     required int id, 
@@ -56,7 +59,9 @@ class LocalNotifications {
     );
   }
 
-  static void onDidReceiveNotificationResponse(NotificationResponse response){
-    appRouter.push('/push-details/${response.payload}');
-  }
+static void onDidReceiveNotificationResponse(
+    NotificationResponse response, GoRouter router) {
+  router.push('/push-details/${response.payload}');
+}
+
 }

@@ -7,7 +7,7 @@ abstract class AuthRepository {
     });
 
 
-  Future<Logout> logout();
+  Future<Logout> logout({required String token});
 
   Future<Register> register({
     required String email,
@@ -28,4 +28,10 @@ abstract class AuthRepository {
   Future<VerifyPhone> verifyPhone({
     required String userId,
     required String code});
+
+   Future<UpdateUser> updateUserTag({
+    required String token,
+    required String userId,
+    required String tag
+  });
 }

@@ -24,8 +24,8 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<Logout> logout() {
-    return authDatasource.logout();
+  Future<Logout> logout({required String token}) {
+    return authDatasource.logout(token: token);
   }
 
   @override
@@ -41,6 +41,11 @@ class AuthRepositoryImpl extends AuthRepository {
   @override
   Future<VerifyPhone> verifyPhone({required String userId, required String code}) {
     return authDatasource.verifyPhone(userId: userId, code: code);
+  }
+  
+  @override
+  Future<UpdateUser> updateUserTag({required String token, required String userId, required String tag}) {
+    return authDatasource.updateUserTag(userId: userId, tag: tag, token: token);
   }
 
 }
