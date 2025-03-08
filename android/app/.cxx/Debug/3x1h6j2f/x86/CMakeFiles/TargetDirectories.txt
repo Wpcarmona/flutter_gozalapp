@@ -1,0 +1,2 @@
+C:/Users/Pedro/OneDrive/Documentos/flutter_gozalapp/android/app/.cxx/Debug/3x1h6j2f/x86/CMakeFiles/edit_cache.dir
+C:/Users/Pedro/OneDrive/Documentos/flutter_gozalapp/android/app/.cxx/Debug/3x1h6j2f/x86/CMakeFiles/rebuild_cache.dir

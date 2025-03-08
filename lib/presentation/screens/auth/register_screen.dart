@@ -20,17 +20,20 @@ class RegisterScreen extends StatelessWidget {
   }
 }
 
-class _RegisterView extends StatefulWidget implements PreferredSizeWidget {
+
+
+class _RegisterView extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   const _RegisterView();
 
   @override
-  State<_RegisterView> createState() => _RegisterViewState();
+  _RegisterViewState createState() => _RegisterViewState();
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-class _RegisterViewState extends State<_RegisterView> {
+class _RegisterViewState extends ConsumerState<_RegisterView> {
   final PageController pageViewController = PageController();
   bool enReached = false;
   bool showFirstForm = true;
@@ -71,6 +74,17 @@ class _RegisterViewState extends State<_RegisterView> {
 
   @override
   Widget build(BuildContext context) {
+    final tagForm = ref.watch(tagFormProvider);
+    final registerForm = ref.watch(registerFormProvider);
+    final otpForm = ref.watch(otpFormProvider);
+
+    ref.listen(authProvider, (previous, next) {
+      if (next.errorMessage.isEmpty) {
+        if(formsStep == 4) return;
+        nextStep();
+      }
+    });
+
     return Stack(
       children: [
         Positioned.fill(
@@ -123,23 +137,87 @@ class _RegisterViewState extends State<_RegisterView> {
             padding: const EdgeInsets.only(top: 20),
             child: SingleChildScrollView(
               child: switch (formsStep) {
-                1 => _FirstForm(onContinue: nextStep),
-                2 => _SecondForm(onContinue: nextStep),
-                3 => _ThirdForm(onContinue: nextStep),
+                1 => _FirstForm(),
+                2 => _SecondForm(),
+                3 => _ThirdForm(),
                 4 => _FourForm(),
                 int() => throw UnimplementedError(),
               },
             ),
           ),
         ),
+        Positioned(
+            bottom: 20,
+            left: 16,
+            right: 16,
+            child: switch (formsStep) {
+              1 => FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFAA02),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: (registerForm.isStepValid) ? nextStep : null,
+                  child: const Text(
+                    'Continuar',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              2 => FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFAA02),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: registerForm.isValid
+                      ? () =>
+                          ref.read(registerFormProvider.notifier).onFormSubmit()
+                      : null,
+                  child: registerForm.formStatus == FormStatus.validating
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          'Registrar',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                ),
+              3 => FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFAA02),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: otpForm.isValid
+                      ? ref.read(otpFormProvider.notifier).onFormSubmit
+                      : null,
+                  child: const Text('Validar Codigo'),
+                ),
+              4 => FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFAA02),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: tagForm.isValid
+                      ? ref.read(tagFormProvider.notifier).onFormSubmit
+                      : null,
+                  child: const Text('Finalizar'),
+                ),
+              int() => throw UnimplementedError(),
+            }),
       ],
     );
   }
 }
 
 class _FirstForm extends ConsumerStatefulWidget {
-  final VoidCallback onContinue;
-  const _FirstForm({required this.onContinue});
+  const _FirstForm();
 
   @override
   ConsumerState<_FirstForm> createState() => _FirstFormState();
@@ -368,58 +446,6 @@ class _FirstFormState extends ConsumerState<_FirstForm> {
                 keyboardType: TextInputType.text,
               ),
             ),
-          const SizedBox(height: 20),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-
-          //     const Text('Acepto '),
-          //     GestureDetector(
-          //       onTap: () {
-          //         // Acción al tocar el texto
-          //       },
-          //       child: Text(
-          //         'Términos y condiciones',
-          //         style: TextStyle(
-          //           color: Theme.of(context).primaryColor,
-          //           decoration: TextDecoration.underline,
-          //         ),
-          //       ),
-          //     ),
-          //     const Text(' de uso'),
-          //     Checkbox(
-          //         value:
-          //             ref.watch(registerFormProvider).termsAndConditions.value,
-          //         onChanged: (bool? value) {
-          //           if (value != null) {
-          //             ref
-          //                 .read(registerFormProvider.notifier)
-          //                 .onTermsAndConditionsChange(value);
-          //           }
-          //         }),
-          //   ],
-          // ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              margin: const EdgeInsets.all(5),
-              width: double.infinity,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFAA02),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed:
-                    (registerForm.isStepValid) ? widget.onContinue : null,
-                child: const Text(
-                  'Continuar',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
           const SizedBox(height: 10),
         ],
       ),
@@ -428,8 +454,7 @@ class _FirstFormState extends ConsumerState<_FirstForm> {
 }
 
 class _SecondForm extends ConsumerWidget {
-  final VoidCallback onContinue;
-  const _SecondForm({required this.onContinue});
+  const _SecondForm();
 
   void showSnackbar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -445,9 +470,7 @@ class _SecondForm extends ConsumerWidget {
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isNotEmpty) {
         showSnackbar(context, next.errorMessage);
-      } else {
-        onContinue();
-      }
+      } 
     });
     return FadeInRight(
       duration: const Duration(milliseconds: 200),
@@ -601,35 +624,6 @@ class _SecondForm extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              margin: const EdgeInsets.all(5),
-              width: double.infinity,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFAA02),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: registerForm.isValid
-                    ? () =>
-                        ref.read(registerFormProvider.notifier).onFormSubmit()
-                    : null,
-                child: registerForm.formStatus == FormStatus.validating
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
-                    : const Text(
-                        'Continuar',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-              ),
-            ),
-          ),
           const SizedBox(height: 10),
         ],
       ),
@@ -638,8 +632,7 @@ class _SecondForm extends ConsumerWidget {
 }
 
 class _ThirdForm extends ConsumerWidget {
-  final VoidCallback onContinue;
-  const _ThirdForm({required this.onContinue});
+  const _ThirdForm();
 
   void showSnackbar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -652,9 +645,7 @@ class _ThirdForm extends ConsumerWidget {
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isNotEmpty) {
         showSnackbar(context, next.errorMessage);
-      } else {
-        onContinue();
-      }
+      } 
     });
     final registerForm = ref.watch(registerFormProvider);
     final otpForm = ref.watch(otpFormProvider);
@@ -702,21 +693,6 @@ class _ThirdForm extends ConsumerWidget {
               errorMessage:
                   otpForm.otp.isPure ? null : otpForm.otp.errorMessage),
           const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFFFAA02),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-              onPressed: otpForm.isValid
-                  ? ref.read(otpFormProvider.notifier).onFormSubmit
-                  : null,
-              child: const Text('Continuar'),
-            ),
-          )
         ],
       ),
     );
@@ -726,10 +702,8 @@ class _ThirdForm extends ConsumerWidget {
 class _FourForm extends ConsumerWidget {
   const _FourForm();
 
-  
-
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tagForm = ref.watch(tagFormProvider);
     return FadeInRight(
       duration: const Duration(milliseconds: 200),
@@ -768,21 +742,6 @@ class _FourForm extends ConsumerWidget {
               ref.read(tagFormProvider.notifier).onTagChanged(selected);
             },
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFFFAA02),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-              onPressed: tagForm.isValid
-                  ? ref.read(tagFormProvider.notifier).onFormSubmit
-                  : null,
-              child: const Text('Continuar'),
-            ),
-          )
         ],
       ),
     );

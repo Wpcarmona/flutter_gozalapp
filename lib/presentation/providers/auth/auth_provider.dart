@@ -28,18 +28,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> loginUser(String numberDocument, String password) async {
-    try {
-      final user = await authRepository.login(
-          numberDocument: numberDocument, password: password);
-      _setLoggedUser(user);
-    } on DioException catch (e) {
-      final errorMessage =
-          e.response?.data['data']['message'] ?? 'Error desconocido';
-      state = state.copyWith(errorMessage: errorMessage);
-    } catch (e) {
-      print('error: $e');
+  try {
+    final user = await authRepository.login(
+        numberDocument: numberDocument, password: password);
+    _setLoggedUser(user);
+  } on DioException catch (e) {
+    final responseData = e.response?.data;
+    if (responseData is Map<String, dynamic>) {
+      final errorData = responseData['data'];
+      if (errorData is Map<String, dynamic> && errorData.containsKey('message')) {
+        state = state.copyWith(errorMessage: errorData['message']);
+      } else {
+        state = state.copyWith(errorMessage: 'Error desconocido');
+      }
+    } else {
+      state = state.copyWith(errorMessage: 'Error inesperado en la respuesta');
     }
+  } catch (e) {
+    print('error: $e');
   }
+}
+
 
   void registerUser(
       String email,
@@ -77,6 +86,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> sendVerifyPhone(String userId) async {
     try {
       await authRepository.sendVerifyPhone(userId: userId);
+      // _setSendVerifyPhone();
     } on DioException catch (e) {
       final errorMessage =
           e.response?.data['data']['message'] ?? 'Error desconocido';
@@ -148,9 +158,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(authStatus: AuthStatus.authenticated);
   }
 
+  void _setSendVerifyPhone() async {
+    state = state.copyWith(
+      errorMessage: '',
+      );
+  }
+
   void _setVerifyPhone(VerifyPhone verifyPhone) async {
     await keyValueStorageService.setKeyValue<int>('stepRegister', 3);
-    state = state.copyWith(authStatus: AuthStatus.chekingType);
+    state = state.copyWith(
+      authStatus: AuthStatus.chekingType,
+      errorMessage: '',
+      );
   }
 
   void _setLoggedUser(Login login) async {
@@ -203,18 +222,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'uid_type': user.participant.uidType,
           'state': user.participant.state,
         }));
-    sendVerifyPhone(user.participant.uid);
     state = state.copyWith(
       user: user.participant,
       authStatus: AuthStatus.chekingOTp,
+      errorMessage: '',
     );
+    sendVerifyPhone(user.participant.uid);
   }
 
   void _setUpdateUser() {
     state = state.copyWith(
       user: state.user,
       authStatus: AuthStatus.authenticated,
-      errorMessage: '',
     );
   }
 }
