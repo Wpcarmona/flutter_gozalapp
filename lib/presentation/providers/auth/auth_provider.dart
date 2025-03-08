@@ -83,6 +83,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> resendVerifyPhone() async {
+    String? userJson = await keyValueStorageService.getValue<String>('user');
+      if (userJson != null) {
+        Map<String, dynamic> userMap = jsonDecode(userJson);
+        await sendVerifyPhone(userMap['uid']);
+    }
+  }
+
   Future<void> sendVerifyPhone(String userId) async {
     try {
       await authRepository.sendVerifyPhone(userId: userId);

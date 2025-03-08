@@ -9,7 +9,7 @@ final goRouterProvider = Provider((ref) {
 
   return GoRouter(
     initialLocation: '/splash',
-    refreshListenable: goRouterNofier, 
+    refreshListenable: goRouterNofier,
     routes: [
       GoRoute(
         path: '/',
@@ -48,25 +48,33 @@ final goRouterProvider = Provider((ref) {
         name: ResetPasswordScreen.name,
         builder: (context, state) => const ResetPasswordScreen(),
       ),
-  ],
-  redirect: (context, state) {
-    final isGoinTo = state.matchedLocation;
-    final authStatus = goRouterNofier.authStatus;
+    ],
+    redirect: (context, state) {
+      final isGoinTo = state.matchedLocation;
+      final authStatus = goRouterNofier.authStatus;
 
-    if(isGoinTo == '/splash' && authStatus == AuthStatus.checking) return null;
-    if(authStatus == AuthStatus.chekingOTp || authStatus == AuthStatus.chekingType){
-      if(isGoinTo == '/auth/login' || isGoinTo == '/auth/register') return null;
-      return '/auth/login';
-    }
-    if(authStatus == AuthStatus.notAuthenticated){
-      if(isGoinTo == '/auth/login' || isGoinTo == '/auth/register') return null;
-      return '/auth/login';
-    }
-    if(authStatus == AuthStatus.authenticated){
-      if(isGoinTo == '/auth/login' || isGoinTo == '/auth/register' || isGoinTo == '/splash') return '/';
-    }
+      if (isGoinTo == '/splash' && authStatus == AuthStatus.checking)
+        return null;
+      if (authStatus == AuthStatus.chekingOTp ||
+          authStatus == AuthStatus.chekingType) {
+        if (isGoinTo == '/auth/login' || isGoinTo == '/auth/register')
+          return null;
+        return '/auth/login';
+      }
+      if (authStatus == AuthStatus.notAuthenticated) {
+        if (isGoinTo == '/auth/login' ||
+            isGoinTo == '/auth/register' ||
+            isGoinTo == '/auth/reset-password') return null;
+        return '/auth/login';
+      }
 
-    return null;
-  },
+      if (authStatus == AuthStatus.authenticated) {
+        if (isGoinTo == '/auth/login' ||
+            isGoinTo == '/auth/register' ||
+            isGoinTo == '/splash') return '/';
+      }
+
+      return null;
+    },
   );
 });

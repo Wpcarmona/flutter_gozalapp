@@ -18,8 +18,12 @@ class _LoginPage extends ConsumerWidget {
   const _LoginPage();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final isSmallScreen = screenHeight < 750;
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: isSmallScreen,
+      floatingActionButton: _RegisterButton(),
       body: Stack(
         children: [
           Container(
@@ -49,7 +53,7 @@ class _LoginPage extends ConsumerWidget {
                   topRight: Radius.circular(30),
                 ),
               ),
-              child: _FormContent(),
+              child: Expanded(child: SingleChildScrollView(child: _FormContent())),
             ),
           ),
         ],
@@ -152,7 +156,9 @@ class _FormContent extends ConsumerWidget {
                   ),
           ),
         ),
-        Padding(
+        (true) 
+        ? const SizedBox()
+        : Padding(
           padding: const EdgeInsets.all(8.0),
           child: FilledButton(
             style: FilledButton.styleFrom(
@@ -183,7 +189,7 @@ class _FormContent extends ConsumerWidget {
             ),
           ),
         ),
-        _RegisterButton()
+        
       ],
     );
   }
@@ -194,37 +200,30 @@ class _RegisterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Positioned(
-        bottom: 30,
-        left: 20, // Margen izquierdo
-        right: 20,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              '¿No tienes cuenta?',
-              style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: Color(0xFFB49480)),
-            ),
-            TextButton(
-              onPressed: () {
-                context.go('/auth/register');
-              },
-              child: const Text(
-                'Registrate',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: Color(0xFFFFAA02),
-                ),
-              ),
-            ),
-          ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          '¿No tienes cuenta?',
+          style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              color: Color(0xFFB49480)),
         ),
-      ),
+        TextButton(
+          onPressed: () {
+            context.go('/auth/register');
+          },
+          child: const Text(
+            'Registrate',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              color: Color(0xFFFFAA02),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

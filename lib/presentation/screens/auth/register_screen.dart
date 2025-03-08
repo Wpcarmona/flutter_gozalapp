@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,8 +22,6 @@ class RegisterScreen extends StatelessWidget {
   }
 }
 
-
-
 class _RegisterView extends ConsumerStatefulWidget
     implements PreferredSizeWidget {
   const _RegisterView();
@@ -38,11 +38,43 @@ class _RegisterViewState extends ConsumerState<_RegisterView> {
   bool enReached = false;
   bool showFirstForm = true;
   int formsStep = 1;
+  int _secondsRemaining = 60;
+  late Timer _timer;
+  bool _canResendCode = false;
 
   @override
   void initState() {
     super.initState();
     _loadStepRegister();
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    setState(() {
+      _secondsRemaining = 60;
+      _canResendCode = false;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 0) {
+        setState(() => _secondsRemaining--);
+      } else {
+        _timer.cancel();
+        setState(() => _canResendCode = true);
+      }
+    });
+  }
+
+  void _resendCode() {
+    if (!_canResendCode) return;
+    ref.read(sendCodeFormProvider.notifier).onFormSubmit();
+    _startCountdown();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   Future<void> _loadStepRegister() async {
@@ -66,11 +98,6 @@ class _RegisterViewState extends ConsumerState<_RegisterView> {
     });
   }
 
-  @override
-  void dispose() {
-    pageViewController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +107,7 @@ class _RegisterViewState extends ConsumerState<_RegisterView> {
 
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isEmpty) {
-        if(formsStep == 4) return;
+        if (formsStep == 4) return;
         nextStep();
       }
     });
@@ -96,7 +123,8 @@ class _RegisterViewState extends ConsumerState<_RegisterView> {
         Positioned(
           top: 10,
           left: 16,
-          child: ClipRRect(
+          child: (formsStep == 1 || formsStep == 2) 
+          ? ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Container(
               width: 40,
@@ -119,17 +147,129 @@ class _RegisterViewState extends ConsumerState<_RegisterView> {
                 },
               ),
             ),
-          ),
+          )
+          : SizedBox(width: 40, height: 40),
         ),
         Positioned(
-          top: 70,
+          top: 50,
           left: 16,
           right: 16,
           child: CustomLinearProgressIndicator(
               formsStep: formsStep, finalStep: 4, colors: Color(0xFFFFC942)),
         ),
         Positioned(
-          top: 98,
+            top: 80,
+            left: 16,
+            right: 16,
+            child: switch (formsStep) {
+              1 => Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      'CHEVERE TENERTE AQUÍ!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'StenbergITC',
+                        fontSize: 28,
+                        height: 1.2,
+                        color: Color(0XFFEC1424),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Una experiencia carnavalera te espera. Ingresa los datos para continuar:',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Komet',
+                        fontSize: 14,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              2 => Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      'ELIGE UNA CONTRASEÑA',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'StenbergITC',
+                        fontSize: 28,
+                        height: 1.2,
+                        color: Color(0XFFEC1424),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Crea una contraseña segura, para proteger tu cuenta y disfrutar del Carnaval sin preocupaciones.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Komet',
+                        fontSize: 14,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              3 => Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      'CÓDIGO DE VERIFICACIÓN ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'StenbergITC',
+                        fontSize: 28,
+                        height: 1.2,
+                        color: Color(0XFFEC1424),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Te enviamos un código al celular, una vez lo recibas ingrésalo aquí.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Komet',
+                        fontSize: 14,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              4 => Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      'YA NOS FALTA POQUITO',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'StenbergITC',
+                        fontSize: 28,
+                        height: 1.2,
+                        color: Color(0XFFEC1424),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      '¿Te identificas con alguno de estos roles?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Komet',
+                        fontSize: 14,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              int() => throw UnimplementedError(),
+            }),
+        Positioned(
+          top: 170,
           left: 0,
           right: 0,
           bottom: 0,
@@ -185,18 +325,45 @@ class _RegisterViewState extends ConsumerState<_RegisterView> {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                 ),
-              3 => FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFAA02),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+              3 => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [ 
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFAA02),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: otpForm.isValid
+                        ? ref.read(otpFormProvider.notifier).onFormSubmit
+                        : null,
+                    child: const Text('Validar código'),
                   ),
-                  onPressed: otpForm.isValid
-                      ? ref.read(otpFormProvider.notifier).onFormSubmit
-                      : null,
-                  child: const Text('Validar Codigo'),
-                ),
+                  const SizedBox(height: 10),
+                  FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFFFFF5ED),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: _canResendCode ? _resendCode : null,
+          child: const Text(
+            'Reenviar código',
+            style: TextStyle(color: Color(0xFFB49480)),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          _canResendCode
+              ? "Puedes reenviar el código ahora."
+              : "Puedes reenviar el código en $_secondsRemaining segundos",
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+                  ]
+              ),
               4 => FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFFFFAA02),
@@ -238,28 +405,6 @@ class _FirstFormState extends ConsumerState<_FirstForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 20),
-          const Text(
-            'CHEVERE TENERTE AQUÍ!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'StenbergITC',
-              fontSize: 28,
-              height: 1.2,
-              color: Color(0XFFEC1424),
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Una experiencia carnavalera te espera. Ingresa los datos para continuar:',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Komet',
-              fontSize: 14,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CustomTextFormField(
@@ -446,7 +591,7 @@ class _FirstFormState extends ConsumerState<_FirstForm> {
                 keyboardType: TextInputType.text,
               ),
             ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -470,35 +615,13 @@ class _SecondForm extends ConsumerWidget {
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isNotEmpty) {
         showSnackbar(context, next.errorMessage);
-      } 
+      }
     });
     return FadeInRight(
       duration: const Duration(milliseconds: 200),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 20),
-          const Text(
-            'ELIGE UNA CONTRASEÑA',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'StenbergITC',
-              fontSize: 28,
-              height: 1.2,
-              color: Color(0XFFEC1424),
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Crea una contraseña segura, para proteger tu cuenta y disfrutar del Carnaval sin preocupaciones.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Komet',
-              fontSize: 14,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CustomTextFormField(
@@ -645,7 +768,7 @@ class _ThirdForm extends ConsumerWidget {
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isNotEmpty) {
         showSnackbar(context, next.errorMessage);
-      } 
+      }
     });
     final registerForm = ref.watch(registerFormProvider);
     final otpForm = ref.watch(otpFormProvider);
@@ -654,38 +777,16 @@ class _ThirdForm extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 20),
-          const Text(
-            'CÓDIGO DE VERIFICACIÓN ',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'StenbergITC',
-              fontSize: 28,
-              height: 1.2,
-              color: Color(0XFFEC1424),
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Te enviamos un código al celular, una vez lo recibas ingrésalo aquí.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Komet',
-              fontSize: 14,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 30),
-          Text(
-            '${registerForm.phone.value.substring(0, 3)}***${registerForm.phone.value.substring(6, 10)}',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Komet',
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              height: 1.2,
-            ),
-          ),
+          // Text(
+          //   '${registerForm.phone.value.substring(0, 3)}***${registerForm.phone.value.substring(6, 10)}',
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //     fontFamily: 'Komet',
+          //     fontWeight: FontWeight.bold,
+          //     fontSize: 16,
+          //     height: 1.2,
+          //   ),
+          // ),
           const SizedBox(height: 20),
           OtpInputField(
               length: 6, // Puedes cambiar a 4 si deseas menos inputs
@@ -704,34 +805,11 @@ class _FourForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tagForm = ref.watch(tagFormProvider);
     return FadeInRight(
       duration: const Duration(milliseconds: 200),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 20),
-          const Text(
-            'YA NOS FALTA POQUITO',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'StenbergITC',
-              fontSize: 28,
-              height: 1.2,
-              color: Color(0XFFEC1424),
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            '¿Te identificas con alguno de estos roles?',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Komet',
-              fontSize: 14,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 30),
           SelectableCardList(
             items: [
               {"text": "tendero", "imagePath": "assets/Images/tendero.png"},
