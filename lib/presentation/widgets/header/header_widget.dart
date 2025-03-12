@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gozalapp/presentation/widgets/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -16,7 +17,9 @@ class HeaderWidget extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class HeaderWidgetState extends State<HeaderWidget> {
-  String userName = 'Usuario';
+  String userName = '';
+  String avatar = '';
+  String totalPoints = '';
 
   @override
   void initState() {
@@ -26,15 +29,17 @@ class HeaderWidgetState extends State<HeaderWidget> {
 
   Future<void> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString('user');
-
+    final userJson = prefs.getString('userInfo');
     if (userJson != null) {
       final userMap = jsonDecode(userJson);
-      String fullName = userMap['name'] ?? 'Usuario';
-      
-      // Tomar solo la primera palabra del nombre
+      String image = userMap['avatar'] ?? '';
+      String fullName = userMap['nombre_completo'] ?? 'Usuario';
+      int totalPoint = userMap['total_points'] ?? 0;
+
       setState(() {
         userName = fullName.split(' ').first;
+        avatar = image;
+        totalPoints = totalPoint.toString();
       });
     }
   }
@@ -42,14 +47,19 @@ class HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text('Hola, $userName'),
+      backgroundColor: const Color(0xFFFFC942),
+      title: ThumbnailWidget(imageUrl: avatar, name: userName),
       leading: IconButton(
         onPressed: () {
           widget.scaffoldKey.currentState?.openDrawer();
         },
-        icon: const Icon(Icons.menu),
+        icon: const Icon(Icons.menu_rounded , color: Colors.white,size: 40,),
       ),
       actions: <Widget>[
+        GestureDetector(
+          child: CustomCoinThumbnail(totalPoints: totalPoints,),
+          onTap: () => context.push('/notifications')
+          ),
         IconButton(
           icon: const Icon(Icons.add_alert),
           onPressed: () {

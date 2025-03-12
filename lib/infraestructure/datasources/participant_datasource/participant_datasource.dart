@@ -19,12 +19,12 @@ class ParticipantSPDatasource extends ParticipantDatasource{
 }
 
   @override
-  Future<User> getUser() async {
+  Future<User> getUser(String token) async {
     final response = await dio.get(
       '/users/info',
       options: Options(
         headers: {
-          'Authorization': 'Bearer 123', //TODO agregar el header desde el isar
+          'Authorization': 'Bearer $token',
         }
       )
       );

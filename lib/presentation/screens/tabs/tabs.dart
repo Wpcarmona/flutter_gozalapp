@@ -29,6 +29,7 @@ class _TabsScreenState extends State<TabsScreen> {
     final scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
+      backgroundColor: Color(0xFFFBE9DC),
       appBar: HeaderWidget(scaffoldKey: scaffoldKey),
       key: scaffoldKey,
       drawer: SideMenu(scaffoldKey: scaffoldKey),
@@ -44,7 +45,9 @@ class _TabsScreenState extends State<TabsScreen> {
           });
         },
         shape: const CircleBorder(),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.transparent,
+        
+        child: Image.asset('assets/Images/icon_gozalapp.png'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(

@@ -11,3 +11,8 @@ export 'Texts/custom_title.dart';
 export 'Texts/custom_view_subtitle.dart';
 export 'Texts/custom_view_title.dart';
 export 'checks/selected_card.dart';
+export 'template/app_tempalte.dart';
+export 'thumbnail/custom_thumbnail.dart';
+export 'thumbnail/custom_coin_thumbnail.dart';
+export 'cards/custom_challenge_card.dart';
+export 'cards/custom_card_navigation_homeview.dart';

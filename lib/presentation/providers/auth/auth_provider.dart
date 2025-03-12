@@ -3,26 +3,32 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gozalapp/domain/entities/entities.dart';
-import 'package:gozalapp/domain/repositories/auth_repository/auth_repository.dart';
-import 'package:gozalapp/infraestructure/repositories/auth_repository/auth_repository.dart';
+import 'package:gozalapp/domain/repositories/domain_repository.dart';
+import 'package:gozalapp/infraestructure/repositories/infraestructure_repository.dart';
 import 'package:gozalapp/presentation/infraestructure/services/key_value_storage_service.dart';
 import 'package:gozalapp/presentation/infraestructure/services/key_value_storage_service_impl.dart';
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authRepository = AuthRepositoryImpl();
   final keyValueStorageService = KeyValueStorageServiceImpl();
+  final participantRepository = ParticipantRepositoryImp();
   return AuthNotifier(
     authRepository: authRepository,
     keyValueStorageService: keyValueStorageService,
+    participantRepository: participantRepository,
   );
 });
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository authRepository;
+  final ParticipantRepository participantRepository;
   final KeyValueStorageService keyValueStorageService;
 
-  AuthNotifier(
-      {required this.authRepository, required this.keyValueStorageService})
+  AuthNotifier({
+        required this.authRepository, 
+        required this.keyValueStorageService,
+        required this.participantRepository
+      })
       : super(AuthState()) {
     checkAuthStatus();
   }
@@ -47,6 +53,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
   } catch (e) {
     print('error: $e');
   }
+}
+
+Future<void> getParticipant(String token) async {
+
+  try {
+    final participant = await participantRepository.getUser(token);
+   _setInfoParticipant(participant);
+  } on DioException catch (e) {
+    final responseData = e.response?.data;
+    if (responseData is Map<String, dynamic>) {
+      final errorData = responseData['data'];
+      if (errorData is Map<String, dynamic> && errorData.containsKey('message')) {
+        state = state.copyWith(errorMessage: errorData['message']);
+      } else {
+        state = state.copyWith(errorMessage: 'Error desconocido');
+      }
+    } else {
+      state = state.copyWith(errorMessage: 'Error inesperado en la respuesta');
+    }
+  } catch (e) {
+    print('errorinParticipant: $e');
+  }
+  
 }
 
 
@@ -146,7 +175,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if(token != null){
     await authRepository.logout(token: token);
     await keyValueStorageService.removeKey('token');
-    await keyValueStorageService.removeKey('user');
+    await keyValueStorageService.removeKey('userInfo');
     state = state.copyWith(
         authStatus: AuthStatus.notAuthenticated,
         user: null,
@@ -172,6 +201,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
   }
 
+void _setInfoParticipant(User user) async {
+  try {
+    await keyValueStorageService.setKeyValue(
+    'userInfo', 
+    jsonEncode({
+    'uid': user.user.uid,
+    'uid_type': user.user.uidType,
+    'email': user.user.email,
+    'points': user.user.points,
+    'total_points': user.user.totalPoints,
+    'coins': user.user.coins,
+    'total_coins': user.user.totalCoins,
+    'state': user.user.state,
+    'bad_email': user.user.badEmail,
+    'email_verified': user.user.emailVerified,
+    'cellphone_verified': user.user.cellphoneVerified,
+    'unconfirmed_email': user.user.unconfirmedEmail,
+    'unconfirmed_cellphone': user.user.unconfirmedCellphone,
+    'avatar': user.user.avatar,
+    'last_activity_at': user.user.lastActivityAt.toString(),
+    'nombre_completo': user.user.nombreCompleto,
+    'ccode': user.user.numeroDeCelular.ccode,
+    'numero_de_celular': user.user.numeroDeCelular.number,
+    'tipo_de_documento': user.user.tipoDeDocumento,
+    'numero_de_documento': user.user.numeroDeDocumento,
+    'tags': user.user.tags,
+    'aceptar_terminos': user.user.aceptarTerminos,
+  }));
+  } catch (e) {
+    print('error: $e');
+  }
+  
+
+}
+
+
   void _setVerifyPhone(VerifyPhone verifyPhone) async {
     await keyValueStorageService.setKeyValue<int>('stepRegister', 3);
     state = state.copyWith(
@@ -182,17 +247,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void _setLoggedUser(Login login) async {
     await keyValueStorageService.setKeyValue('token', login.token);
-    await keyValueStorageService.setKeyValue(
-        'user',
-        jsonEncode({
-          '_id': login.participant.id,
-          'email': login.participant.email,
-          'name': login.participant.name,
-          'avatar': login.participant.avatar,
-          'uid': login.participant.uid,
-          'uid_type': login.participant.uidType,
-          'state': login.participant.state,
-        }));
+    // await keyValueStorageService.setKeyValue(
+    //     'user',
+    //     jsonEncode({
+    //       '_id': login.participant.id,
+    //       'email': login.participant.email,
+    //       'name': login.participant.name,
+    //       'avatar': login.participant.avatar,
+    //       'uid': login.participant.uid,
+    //       'uid_type': login.participant.uidType,
+    //       'state': login.participant.state,
+    //     }));
+    await getParticipant(login.token);
     // print('token1: ${await keyValueStorageService.getValue<String>('token')}');
 
     // String? userJson = await keyValueStorageService.getValue<String>('user');
@@ -210,6 +276,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // } else {
     //   print('No se encontró ningún usuario almacenado.');
     // }
+    
     state = state.copyWith(
       user: login.participant,
       authStatus: AuthStatus.authenticated,

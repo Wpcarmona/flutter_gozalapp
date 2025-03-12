@@ -31,7 +31,7 @@ class SideMenuState extends ConsumerState<SideMenu> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-        
+
             // Opciones del menú
             Expanded(
               child: ListView(
@@ -52,7 +52,6 @@ class SideMenuState extends ConsumerState<SideMenu> {
                       widget.scaffoldKey.currentState?.closeDrawer();
                     },
                   ),
-                  
                   ListTile(
                     leading: const Icon(Icons.settings),
                     title: const Text('Configuración'),
@@ -64,24 +63,30 @@ class SideMenuState extends ConsumerState<SideMenu> {
                 ],
               ),
             ),
-        
+
             // Botón de cerrar sesión
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  ref.read(authProvider.notifier).logout();
-                  widget.scaffoldKey.currentState?.closeDrawer();
-                },
-                icon: const Icon(Icons.logout, color: Colors.white,),
-                label: const Text('Cerrar Sesión'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-              ),
-            ),
+                padding: const EdgeInsets.all(16.0),
+                child: TextButton.icon(
+                  onPressed: () {
+                    ref.read(authProvider.notifier).logout();
+                    widget.scaffoldKey.currentState?.closeDrawer();
+                  },
+                  icon: const Icon(Icons.logout, color: Color(0xFFFFAA02)),
+                  label: const Text(
+                    'Cerrar Sesión',
+                    style: TextStyle(
+                      color: Color(0xFFFFAA02),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: Colors.transparent, // Fondo transparente
+                    foregroundColor: Colors.white, // Color del texto y el ícono
+                  ),
+                )),
           ],
         ),
       ),

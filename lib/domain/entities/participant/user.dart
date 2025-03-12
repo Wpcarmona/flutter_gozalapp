@@ -15,8 +15,8 @@ class ObjectUser {
   final String email;
   final int points;
   final int totalPoints;
-  final List<String> coins;
-  final List<String> totalCoins;
+  final List<dynamic> coins;
+  final List<dynamic> totalCoins;
   final String state;
   final bool badEmail;
   final bool emailVerified;
@@ -29,8 +29,8 @@ class ObjectUser {
   final PhoneNumber numeroDeCelular;
   final String tipoDeDocumento;
   final String numeroDeDocumento;
-  final List<String> tags;
-  final bool? aceptarTerminos;
+  final dynamic tags;
+  final dynamic aceptarTerminos;
 
   ObjectUser({
     required this.uid,
